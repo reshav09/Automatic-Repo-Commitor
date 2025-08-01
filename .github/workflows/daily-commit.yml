@@ -1,9 +1,9 @@
-name: Daily Commit
+name: Daily Random Commits
 
 on:
   schedule:
     - cron: '15 4 * * *'  # Runs every day at 04:15 UTC
-  workflow_dispatch:  #Allow Manual Trigger
+  workflow_dispatch:
 
 jobs:
   commit:
@@ -14,16 +14,21 @@ jobs:
         with:
           token: ${{ secrets.PERSONAL_TOKEN }}
 
-
-      - name: Commit step - 23f2005430@ds.study.iitm.ac.in
-        run: |
-          echo " My Daily run on: $(date -u) " >> daily-commit-log.txt
-
-      - name: Git Commit and Push
+      - name: Generate Random Commits (5–10)
         run: |
           git config user.name "Reshav Sharma"
           git config user.email "23f2005430@ds.study.iitm.ac.in"
-          git add daily-commit-log.txt
-          git commit -m "Auto commit at $(date -u)" || echo "No changes to commit"
-          git push
+          
+          count=$(( RANDOM % 6 + 5 ))  # Random number between 5 and 10
+          echo "Generating $count commits"
 
+          for i in $(seq 1 $count); do
+            echo "Commit $i at $(date -u)" >> daily-commit-log.txt
+            git add daily-commit-log.txt
+            git commit -m "Auto commit $i at $(date -u)"
+            sleep 1  # Small delay to ensure unique timestamps
+          done
+
+      - name: Push Commits
+        run: |
+          git push https://x-access-token:${{ secrets.PERSONAL_TOKEN }}@github.com/${{ github.repository }}.git
